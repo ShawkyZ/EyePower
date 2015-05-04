@@ -1,0 +1,3 @@
+C:\Users\Abdo\Documents\GitHub\EyePower\EyePower\bin\Debug\Eye Power.exe.config
+C:\Users\Abdo\Documents\GitHub\EyePower\EyePower\obj\Debug\Eye Power.exe
+C:\Users\Abdo\Documents\GitHub\EyePower\EyePower\obj\Debug\Eye Power.pdb

@@ -7,7 +7,7 @@
     <ProjectGuid>{22C152FC-72CF-401F-A11E-C4FF0F03E585}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FaceAPIDemo</RootNamespace>
+    <RootNamespace>EyePower</RootNamespace>
     <AssemblyName>Eye Power</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

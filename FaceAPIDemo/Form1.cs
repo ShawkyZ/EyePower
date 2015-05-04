@@ -77,7 +77,7 @@ namespace FaceAPIDemo
         {
             var queryString = HttpUtility.ParseQueryString(string.Empty);
             queryString["visualFeatures"] = "Categories,Adult,Faces";
-            queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
+            queryString["subscription-key"] = "<Service_Subscrption_Key>";
             var uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
             var request = (HttpWebRequest)WebRequest.Create(uri);
             var data = Encoding.ASCII.GetBytes(imgPath);
@@ -110,7 +110,7 @@ namespace FaceAPIDemo
         {
             var queryString = HttpUtility.ParseQueryString(string.Empty);
             queryString["visualFeatures"] = "Categories,Adult,Faces";
-            queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
+            queryString["subscription-key"] = "<Service_Subscrption_Key>";
             var uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
             var request = (HttpWebRequest)WebRequest.Create(uri);
 

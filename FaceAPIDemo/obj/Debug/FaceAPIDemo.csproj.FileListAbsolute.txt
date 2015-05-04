@@ -1,0 +1,10 @@
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\bin\Debug\Eye Power.exe.config
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\bin\Debug\Eye Power.exe
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\bin\Debug\Eye Power.pdb
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Form1.resources
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Properties.Resources.resources
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.csproj.GenerateResource.Cache
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\Eye Power.exe
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\Eye Power.pdb
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\bin\Debug\AutoUpdater.NET.dll
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FaceAPIDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.csprojResolveAssemblyReference.cache

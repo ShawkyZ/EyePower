@@ -7,7 +7,7 @@
     <ProjectGuid>{22C152FC-72CF-401F-A11E-C4FF0F03E585}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EyePower</RootNamespace>
+    <RootNamespace>FaceAPIDemo</RootNamespace>
     <AssemblyName>Eye Power</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -78,10 +78,11 @@
     </Compile>
     <Compile Include="Model\adult.cs" />
     <Compile Include="Model\categories.cs" />
-    <Compile Include="Model\vision.cs" />
     <Compile Include="Model\face.cs" />
+    <Compile Include="Model\FaceEntity.cs" />
     <Compile Include="Model\faceRectangle.cs" />
     <Compile Include="Model\metadata.cs" />
+    <Compile Include="Model\vision.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -111,6 +112,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\inside.png" />
     <Content Include="view24.ico" />
   </ItemGroup>
   <ItemGroup>

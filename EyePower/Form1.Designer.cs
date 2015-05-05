@@ -44,21 +44,23 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.lblState = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.lblPath = new System.Windows.Forms.Label();
-            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Location = new System.Drawing.Point(15, 320);
+            this.pictureBox1.Location = new System.Drawing.Point(15, 307);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(490, 230);
+            this.pictureBox1.Size = new System.Drawing.Size(490, 200);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -87,7 +89,7 @@
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(15, 161);
+            this.richTextBox1.Location = new System.Drawing.Point(15, 148);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(490, 140);
@@ -97,7 +99,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 145);
+            this.label2.Location = new System.Drawing.Point(12, 132);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(24, 13);
             this.label2.TabIndex = 2;
@@ -180,6 +182,13 @@
             this.sourceCodeToolStripMenuItem.Text = "Source Code";
             this.sourceCodeToolStripMenuItem.Click += new System.EventHandler(this.sourceCodeToolStripMenuItem_Click);
             // 
+            // checkForUpdateToolStripMenuItem
+            // 
+            this.checkForUpdateToolStripMenuItem.Name = "checkForUpdateToolStripMenuItem";
+            this.checkForUpdateToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.checkForUpdateToolStripMenuItem.Text = "Check For Update";
+            this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdateToolStripMenuItem_Click);
+            // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
@@ -216,12 +225,16 @@
             this.lblPath.Size = new System.Drawing.Size(355, 23);
             this.lblPath.TabIndex = 2;
             // 
-            // checkForUpdateToolStripMenuItem
+            // pictureBox2
             // 
-            this.checkForUpdateToolStripMenuItem.Name = "checkForUpdateToolStripMenuItem";
-            this.checkForUpdateToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.checkForUpdateToolStripMenuItem.Text = "Check For Update";
-            this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdateToolStripMenuItem_Click);
+            this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox2.Image = global::FaceAPIDemo.Properties.Resources.inside;
+            this.pictureBox2.Location = new System.Drawing.Point(424, 513);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(108, 53);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 6;
+            this.pictureBox2.TabStop = false;
             // 
             // Form1
             // 
@@ -229,6 +242,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(538, 575);
+            this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.textBox1);
@@ -255,6 +269,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -282,6 +297,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label lblPath;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }
 

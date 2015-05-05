@@ -1,7 +1,7 @@
 ## EyePower
 Analyze Any Image With Single Click.
-Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) for analyzing Images.
-### > [Download Installer](http://goo.gl/13bx3Q)
+Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) And [Face++ Detection API](http://www.faceplusplus.com/).
+### > [Download Installer](https://goo.gl/Ayfp5X)
 
 
 ## How To Use:
@@ -17,7 +17,7 @@ Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) for 
 
 
 # Note:
-To rebuild this project again you need to have subscription key for the Vision API. You can get it from [Here](https://www.projectoxford.ai/vision). When you get the key replace the <Service_Subscrption_Key> string in the Form1.cs with your new subscription key.
+To rebuild this project again you need to have subscription key for the Vision API and Get The API Key and API Secret for Face++ API. You can get the Vision Subscription Key from [Here](https://www.projectoxford.ai/vision) and Face++ API Key And API Secret from [Here](http://www.faceplusplus.com/). When you get the keys replace the <Subscription_Key> string in the Form1.cs with your new subscription key and <API_KEY> and <API_SECRET> with your new Face++ API Keys.
 
 
 > Works On Windows Vista SP2, 7 , 8 Since The .NET 4.5 is Supported On It.

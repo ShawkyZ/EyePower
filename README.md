@@ -25,4 +25,4 @@ To rebuild this project again you need to have subscription key for the Vision A
 
 
 ### Application Main Window : 
-![Eye Power Main Window](https://github.com/ShawkyZ/EyePower/blob/master/Screenshot.png)
+![Eye Power Main Window](https://github.com/ShawkyZ/EyePower/blob/master/Screenshot1.png)

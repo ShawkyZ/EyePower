@@ -77,8 +77,8 @@ namespace FaceAPIDemo
         {
             //Get Result From Face++ Detection API
             var queryString = HttpUtility.ParseQueryString(string.Empty);
-            queryString["api_key"] = "da24b5e759a050c278bfcc8a4a67a77d";
-            queryString["api_secret"] = "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ";
+            queryString["api_key"] = "<API_KEY>";
+            queryString["api_secret"] = "<API_SECRET>";
             queryString["url"] = imgPath;
             queryString["attribute"] = "gender,age,race,smiling";
             var uri = new Uri("https://api.us.faceplusplus.com/v2/detection/detect?" + queryString);
@@ -96,7 +96,7 @@ namespace FaceAPIDemo
                     //Get Result From Oxford Vision Detection API
                     queryString = HttpUtility.ParseQueryString(string.Empty);
                     queryString["visualFeatures"] = "Categories,Adult,Faces";
-                    queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
+                    queryString["subscription-key"] = "<Subscription_Key>";
                     uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
                     var request = (HttpWebRequest)WebRequest.Create(uri);
                     var data = Encoding.ASCII.GetBytes("{\"Url\":\"" + imgPath + "\"}");
@@ -128,8 +128,8 @@ namespace FaceAPIDemo
             //Get Result From Face++ Detection API
             Dictionary<object, object> param = new Dictionary<object, object>();
             string url = "https://api.us.faceplusplus.com/v2/detection/detect";
-            param.Add("api_key", "da24b5e759a050c278bfcc8a4a67a77d");
-            param.Add("api_secret", "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ");
+            param.Add("api_key", "<API_KEY>");
+            param.Add("api_secret", "<API_SECRET>");
             param.Add("attribute", "gender,age,race,smiling");
             string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
             byte[] boundarybytes = System.Text.Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
@@ -180,7 +180,7 @@ namespace FaceAPIDemo
                         //Get Result From OxFord Vision Detection API
                         var queryString = HttpUtility.ParseQueryString(string.Empty);
                         queryString["visualFeatures"] = "Categories,Adult,Faces";
-                        queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
+                        queryString["subscription-key"] = "<Subscription_Key>";
                         var uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
                         request = (HttpWebRequest)WebRequest.Create(uri);
                         request.Method = "POST";

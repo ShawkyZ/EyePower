@@ -19,10 +19,12 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Reflection;
 using AutoUpdaterDotNET;
+using System.Net.Security;
 namespace FaceAPIDemo
 {
     public partial class Form1 : Form
     {
+        SpeechSynthesizer syn = new SpeechSynthesizer();
         public Form1()
         {
             //TODO:Register App in Windows Registry
@@ -77,11 +79,11 @@ namespace FaceAPIDemo
         {
             //Get Result From Face++ Detection API
             var queryString = HttpUtility.ParseQueryString(string.Empty);
-            queryString["api_key"] = "<API_KEY>";
-            queryString["api_secret"] = "<API_SECRET>";
+            queryString["api_key"] = "da24b5e759a050c278bfcc8a4a67a77d";
+            queryString["api_secret"] = "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ";
             queryString["url"] = imgPath;
             queryString["attribute"] = "gender,age,race,smiling";
-            var uri = new Uri("https://api.us.faceplusplus.com/v2/detection/detect?" + queryString);
+            var uri = new Uri("https://apius.faceplusplus.com/v2/detection/detect?" + queryString);
             WebClient wb = new WebClient();
             try
             {
@@ -92,11 +94,10 @@ namespace FaceAPIDemo
                     DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(DetectedResult));
                     MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(response));
                     var result = (DetectedResult)contract.ReadObject(mstream);
-
                     //Get Result From Oxford Vision Detection API
                     queryString = HttpUtility.ParseQueryString(string.Empty);
                     queryString["visualFeatures"] = "Categories,Adult,Faces";
-                    queryString["subscription-key"] = "<Subscription_Key>";
+                    queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
                     uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
                     var request = (HttpWebRequest)WebRequest.Create(uri);
                     var data = Encoding.ASCII.GetBytes("{\"Url\":\"" + imgPath + "\"}");
@@ -127,9 +128,9 @@ namespace FaceAPIDemo
         {
             //Get Result From Face++ Detection API
             Dictionary<object, object> param = new Dictionary<object, object>();
-            string url = "https://api.us.faceplusplus.com/v2/detection/detect";
-            param.Add("api_key", "<API_KEY>");
-            param.Add("api_secret", "<API_SECRET>");
+            string url = "https://apius.faceplusplus.com/v2/detection/detect";
+            param.Add("api_key", "da24b5e759a050c278bfcc8a4a67a77d");
+            param.Add("api_secret", "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ");
             param.Add("attribute", "gender,age,race,smiling");
             string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
             byte[] boundarybytes = System.Text.Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
@@ -168,7 +169,7 @@ namespace FaceAPIDemo
                         rs.Close();
 
                         WebResponse wresp = null;
-
+ 
                         wresp = request.GetResponse();
                         Stream stream2 = wresp.GetResponseStream();
                         StreamReader reader2 = new StreamReader(stream2);
@@ -180,7 +181,7 @@ namespace FaceAPIDemo
                         //Get Result From OxFord Vision Detection API
                         var queryString = HttpUtility.ParseQueryString(string.Empty);
                         queryString["visualFeatures"] = "Categories,Adult,Faces";
-                        queryString["subscription-key"] = "<Subscription_Key>";
+                        queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
                         var uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
                         request = (HttpWebRequest)WebRequest.Create(uri);
                         request.Method = "POST";
@@ -196,7 +197,7 @@ namespace FaceAPIDemo
                         contract = new DataContractJsonSerializer(typeof(vision));
                         mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseString));
                         var Vision = (vision)contract.ReadObject(mstream);
-                        showResult(result,Vision);
+                        showResult(result, Vision);
                     }).Start();
             }
             catch { MessageBox.Show("Unsupported File Type"); }
@@ -207,9 +208,9 @@ namespace FaceAPIDemo
         {
             this.Invoke(new Action(() =>
             {
+                button3.Show();
                 richTextBox1.Clear();
                 var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
-                SpeechSynthesizer syn = new SpeechSynthesizer();
                 syn.SetOutputToDefaultAudioDevice();
                 bool hasFaces = false;
                 //TODO:Check If The API Detected Adult Content In This Photo.
@@ -250,8 +251,19 @@ namespace FaceAPIDemo
                         int count = 0;
                         foreach (var item in res)
                         {
-                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " His Race is: " + item.attribute.race.value + " And He Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
-                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " His Race is: " + item.attribute.race.value +" And He Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                            string[] heshe = new string[2];
+                            if(item.attribute.gender.value.ToLower()=="female")
+                            {
+                                heshe[0] = "she";
+                                heshe[1] = "her";
+                            }
+                            else
+                            {
+                                heshe[0] = "he";
+                                heshe[1] = "his";
+                            }
+                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value +  " "+heshe[1]+" Race is: " + item.attribute.race.value + " And "+heshe[0]+" Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
+                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
                         }
                     }
                 }
@@ -298,6 +310,8 @@ namespace FaceAPIDemo
             string filename = openFileDialog1.FileName;
             if (filename != "")
             {
+                try { syn.SpeakAsyncCancelAll(); }
+                catch { }
                 richTextBox1.Clear();
                 lblState.Text = "Processing...";
                 lblPath.Text = filename;
@@ -315,6 +329,8 @@ namespace FaceAPIDemo
         {
             if (Uri.IsWellFormedUriString(textBox1.Text, UriKind.Absolute))
             {
+                try { syn.SpeakAsyncCancelAll(); }
+                catch { }
                 richTextBox1.Clear();
                 lblState.Text = "Processing...";
                 button1.Enabled = false;
@@ -376,6 +392,19 @@ namespace FaceAPIDemo
                 return "Happy";
             else
                 return "Very Happy";
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try { syn.SpeakAsyncCancelAll(); button3.Hide(); }
+            catch { }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try { syn.SpeakAsyncCancelAll();
+            }
+            catch { }
         }
 
     }

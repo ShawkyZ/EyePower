@@ -1,7 +1,7 @@
 ## EyePower
 Analyze Any Image With Single Click.
 Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) And [Face++ Detection API](http://www.faceplusplus.com/).
-### > [Download Installer](https://goo.gl/Ayfp5X)
+### > [Download Installer](https://goo.gl/Mm3qZJ)
 
 
 ## How To Use:

@@ -2,7 +2,7 @@
 Analyze Any Image With Single Click.
 Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) And [Face++ Detection API](http://www.faceplusplus.com/), [Recognize Image Tagging API](https://rekognition.com/developer/scene) and [Alchemy Image Tagging API](http://www.alchemyapi.com/api/image-tagging/image.html)
 
-### > [Download Installer](https://goo.gl/JruW3y)
+### > [Download Installer](https://goo.gl/3hpClP)
 ### > [Check The App On SoftPedia](http://www.softpedia.com/get/Multimedia/Graphic/Graphic-Others/Eye-Power.shtml)
 
 ## How To Use:

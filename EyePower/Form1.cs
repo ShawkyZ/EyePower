@@ -28,6 +28,7 @@ using FaceAPIDemo.Detect.Faces;
 using FaceAPIDemo.Model.Alchemy;
 using FaceAPIDemo.Model.Rekognize;
 using System.Security.AccessControl;
+using System.Media;
 namespace FaceAPIDemo
 {
     public partial class Form1 : Form
@@ -52,6 +53,7 @@ namespace FaceAPIDemo
                 }
             }
             InitializeComponent();
+            toolTip1.SetToolTip(textBox1, "URL");            
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "JPEG Image(*.jpg)|*.jpg|BMP Image(*.bmp)|*.bmp|PNG Image(*.png)|*.png|GIF Image(*.gif)|*.gif";
@@ -66,7 +68,7 @@ namespace FaceAPIDemo
                     double sizeinMB = info.Length / (1024 * 1024);
                     if (sizeinMB <= 4)
                     {
-                        lblState.Text = "Processing...";
+                        richTextBox1.Text = "Status: Processing...\n\n";
                         lblPath.Text = args[1];
                         button1.Enabled = false;
                         button2.Enabled = false;
@@ -105,7 +107,6 @@ namespace FaceAPIDemo
                                 {
                                     button1.Enabled = true;
                                     button2.Enabled = true;
-                                    lblState.Text = "Done";
                                 }));
                             }
                             catch (Exception ex) { MessageBox.Show(ex.ToString()); }
@@ -126,9 +127,13 @@ namespace FaceAPIDemo
 
         void showResult(DetectedResult result, RekognizeResult rekognize)
         {
+            new Thread(() =>
+            {
+                new SoundPlayer(Path.GetDirectoryName(Application.ExecutablePath) + "\\done.wav").PlaySync();
+            }).Start();
             this.Invoke(new Action(() =>
             {
-                button3.Show();
+                richTextBox1.Text = "Status: Done.\n\n";
                 richTextBox1.Clear();
                 var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
                 syn.SetOutputToDefaultAudioDevice();
@@ -138,12 +143,15 @@ namespace FaceAPIDemo
                 {
                     if (rekognize.scene_understanding.matches.Count() > 0)
                     {
-                        syn.SpeakAsync("Image Category is:  ");
-                        richTextBox1.Text += "Image Category is:  ";
+                        richTextBox1.Text += "Image Category is: ";
+                        int count = 0;
                         foreach (var item in rekognize.scene_understanding.matches)
                         {
-                            syn.SpeakAsync(item.tag.Replace('_', ' ') + "\n");
-                            richTextBox1.Text += item.tag.Replace('_', ' ') + "\n";
+                            if(count==rekognize.scene_understanding.matches.Count-1)
+                            richTextBox1.Text += item.tag.Replace('_', ' ') + ".\n";
+                            else
+                            richTextBox1.Text += item.tag.Replace('_', ' ') + ", ";
+                            count++;
                         }
                     }
                 }
@@ -153,14 +161,12 @@ namespace FaceAPIDemo
                         hasFaces = true;
                 if (hasFaces)
                 {
-                    syn.SpeakAsync(res.Count() + " Faces Detected\n");
-                    richTextBox1.Text += res.Count() + " Faces Detected\n";
+                    richTextBox1.Text += res.Count() + " Faces Detected.\n";
                     if (res.Count() > 0)
                     {
                         if (res.Count() > 1)
                         {
-                            syn.SpeakAsync("Starting from the Left\n");
-                            richTextBox1.Text += "Starting from the Left\n";
+                            richTextBox1.Text += "Starting from the Left.\n";
                         }
                         int count = 0;
                         foreach (var item in res)
@@ -176,27 +182,28 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
-                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                            richTextBox1.Text +="Face Number " + (++count)+ ": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
                         }
                     }
                 }
                 else
                 {
-                    syn.SpeakAsync("No Faces Detected\n");
-                    richTextBox1.Text += "No Faces Detected\n";
+                    richTextBox1.Text += "No Faces Detected.\n";
                     button1.Enabled = true;
                     button2.Enabled = true;
-                    lblState.Text = "Done";
                 }
             }));
 
         }
         void showResult(DetectedResult result, AlchemyResult alchemy)
         {
+            new Thread(() =>
+            {
+                new SoundPlayer(Path.GetDirectoryName(Application.ExecutablePath) + "\\done.wav").PlaySync();
+            }).Start();
             this.Invoke(new Action(() =>
             {
-                button3.Show();
+                richTextBox1.Text = "State: Done.\n\n";
                 richTextBox1.Clear();
                 var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
                 syn.SetOutputToDefaultAudioDevice();
@@ -206,12 +213,15 @@ namespace FaceAPIDemo
                 {
                     if (alchemy.imageKeywords.Count() > 0)
                     {
-                        syn.SpeakAsync("Image Category is:  ");
-                        richTextBox1.Text += "Image Category is:  ";
+                        richTextBox1.Text += "Image Category is: ";
+                        int count = 0;
                         foreach (var item in alchemy.imageKeywords)
                         {
-                            syn.SpeakAsync(item.text.Replace('_', ' ') + "\n");
-                            richTextBox1.Text += item.text.Replace('_', ' ') + "\n";
+                            if (count == alchemy.imageKeywords.Count - 1)
+                                richTextBox1.Text += item.text.Replace('_', ' ') + ".\n";
+                            else
+                                richTextBox1.Text += item.text.Replace('_', ' ') + ", ";
+                            count++;
                         }
                     }
                 }
@@ -222,14 +232,12 @@ namespace FaceAPIDemo
                         hasFaces = true;
                 if (hasFaces)
                 {
-                    syn.SpeakAsync(res.Count() + " Faces Detected\n");
-                    richTextBox1.Text += res.Count() + " Faces Detected\n";
+                    richTextBox1.Text += res.Count() + " Faces Detected.\n";
                     if (res.Count() > 0)
                     {
                         if (res.Count() > 1)
                         {
-                            syn.SpeakAsync("Starting from the Left\n");
-                            richTextBox1.Text += "Starting from the Left\n";
+                            richTextBox1.Text += "Starting from the Left.\n";
                         }
                         int count = 0;
                         foreach (var item in res)
@@ -245,27 +253,28 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
-                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                            richTextBox1.Text += "Face Number " + (++count) + ": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
                         }
                     }
                 }
                 else
                 {
-                    syn.SpeakAsync("No Faces Detected\n");
-                    richTextBox1.Text += "No Faces Detected\n";
+                    richTextBox1.Text += "No Faces Detected.\n";
                     button1.Enabled = true;
                     button2.Enabled = true;
-                    lblState.Text = "Done";
                 }
             }));
 
         }
         void showResult(DetectedResult result, vision Vision)
         {
+            new Thread(() =>
+            {
+                new SoundPlayer(Path.GetDirectoryName(Application.ExecutablePath) + "\\done.wav").PlaySync();
+            }).Start();
             this.Invoke(new Action(() =>
             {
-                button3.Show();
+                richTextBox1.Text = "State: Done.\n\n";
                 richTextBox1.Clear();
                 var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
                 syn.SetOutputToDefaultAudioDevice();
@@ -275,20 +284,22 @@ namespace FaceAPIDemo
                 {
                     if (Vision.categories.Count() > 0)
                     {
-                        syn.SpeakAsync("Image Category is:  ");
-                        richTextBox1.Text += "Image Category is:  ";
+                        richTextBox1.Text += "Image Category is: ";
+                        int count = 0;
                         foreach (var item in Vision.categories)
                         {
-                            syn.SpeakAsync(item.name.Replace('_', ' ') + "\n");
-                            richTextBox1.Text += item.name.Replace('_', ' ') + "\n";
+                            if (count == Vision.categories.Count - 1)
+                                richTextBox1.Text += item.name.Replace('_', ' ') + ".\n";
+                            else
+                                richTextBox1.Text += item.name.Replace('_', ' ') + ", ";
+                            count++;
                         }
                     }
                 }
                 ////TODO:Check If The OxFord Vision API Detected Adult Content In This Photo.
                 if (Vision.adult.isAdultContent)
                 {
-                    syn.SpeakAsync("Image Has Adult Content\n");
-                    richTextBox1.Text += "Image Has Adult Content\n";
+                    richTextBox1.Text += "Image Has Adult Content.\n";
                 }
                 //Check If Face++ Returned Any Faces
                 if (result.face != null)
@@ -296,14 +307,12 @@ namespace FaceAPIDemo
                         hasFaces = true;
                 if (hasFaces)
                 {
-                    syn.SpeakAsync(res.Count() + " Faces Detected\n");
-                    richTextBox1.Text += res.Count() + " Faces Detected\n";
+                    richTextBox1.Text += res.Count() + " Faces Detected.\n";
                     if (res.Count() > 0)
                     {
                         if (res.Count() > 1)
                         {
-                            syn.SpeakAsync("Starting from the Left\n");
-                            richTextBox1.Text += "Starting from the Left\n";
+                            richTextBox1.Text += "Starting from the Left.\n";
                         }
                         int count = 0;
                         foreach (var item in res)
@@ -319,8 +328,7 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
-                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                            richTextBox1.Text += "Face Number " + (++count) +": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
                         }
                     }
                 }
@@ -330,34 +338,28 @@ namespace FaceAPIDemo
                     if (Vision.faces.Count > 0)
                     {
                         var ress = Vision.faces.OrderBy(o => o.faceRectangle.left).ToArray();
-                        syn.SpeakAsync(ress.Count() + " Faces Detected\n");
-                        richTextBox1.Text += ress.Count() + " Faces Detected\n";
+                        richTextBox1.Text += ress.Count() + " Faces Detected.\n";
                         if (ress.Count() > 0)
                         {
                             if (ress.Count() > 1)
                             {
-                                syn.SpeakAsync("Starting from the Left\n");
-                                richTextBox1.Text += "Starting from the Left\n";
+                                richTextBox1.Text += "Starting from the Left.\n";
                             }
                             int count = 0;
                             foreach (var item in ress)
                             {
-                                richTextBox1.Text += "Age: " + item.age + " And the Gender is: " + item.gender + " " + "\n";
-                                syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.age + " And the Gender is: " + item.gender);
+                                richTextBox1.Text += "Face Number " + (++count) + ": Age " + item.age + ", And the Gender is " + item.gender + " " + ".\n";
                             }
                         }
                     }
                     else
                     {
-                        syn.SpeakAsync("No Faces Detected\n");
-                        richTextBox1.Text += "No Faces Detected\n";
+                        richTextBox1.Text += "No Faces Detected/\n";
                     }
 
                 }
                 button1.Enabled = true;
                 button2.Enabled = true;
-                lblState.Text = "Done";
-
             }));
 
         }
@@ -367,14 +369,12 @@ namespace FaceAPIDemo
             string filename = openFileDialog1.FileName;
             if (filename != "")
             {
-                try { syn.SpeakAsyncCancelAll(); }
-                catch { }
                 FileInfo info = new FileInfo(openFileDialog1.FileName);
                 double imgsizeMB = info.Length / (1024 * 1024);
                 if (imgsizeMB <= 4)
                 {
                     richTextBox1.Clear();
-                    lblState.Text = "Processing...";
+                    richTextBox1.Text = "Status: Processing...";
                     lblPath.Text = filename;
                     button1.Enabled = false;
                     button2.Enabled = false;
@@ -411,7 +411,6 @@ namespace FaceAPIDemo
                             {
                         button1.Enabled = true;
                         button2.Enabled = true;
-                        lblState.Text = "Done";
                             }));
                     }).Start();
                    
@@ -430,7 +429,7 @@ namespace FaceAPIDemo
                 try { syn.SpeakAsyncCancelAll(); }
                 catch { }
                 richTextBox1.Clear();
-                lblState.Text = "Processing...";
+                richTextBox1.Text = "Status: Processing...";
                 button1.Enabled = false;
                 button2.Enabled = false;
                 WebClient client = new WebClient();
@@ -467,13 +466,12 @@ namespace FaceAPIDemo
                         {
                             button1.Enabled = true;
                             button2.Enabled = true;
-                            lblState.Text = "Done";
                         }));
                     }).Start();
                 }
                 catch
                 {
-                    lblState.Text = "Idle";
+                    richTextBox1.Text = "Choose an image from your local PC By Clicking Browse Button, Or Paste Image URL in the URL EditBox and click Start.";
                     button1.Enabled = true;
                     button2.Enabled = true;
                     MessageBox.Show("Unsupported File Type");
@@ -502,11 +500,11 @@ namespace FaceAPIDemo
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AutoUpdater.Start("http://shawkyz.github.io/Eye-Power/app/Appcast.xml");
+            AutoUpdater.Start("http://shawkyz.azurewebsites.net/apps/eyepower/Appcast.xml");
         }
         private void checkForUpdateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AutoUpdater.Start("http://shawkyz.github.io/Eye-Power/app/Appcast.xml");
+            AutoUpdater.Start("http://shawkyz.github.io/EyePower/app/Appcast.xml");
         }
         string faceState(double smileValue)
         {
@@ -521,20 +519,9 @@ namespace FaceAPIDemo
             else
                 return "Very Happy";
         }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            try { syn.SpeakAsyncCancelAll(); button3.Hide(); }
-            catch { }
-        }
-
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try
-            {
-                syn.SpeakAsyncCancelAll();
-            }
-            catch { }
+
         }
         private bool GrantAccess(string fullPath)
         {
@@ -545,6 +532,11 @@ namespace FaceAPIDemo
                                                              PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
             dInfo.SetAccessControl(dSecurity);
             return true;
+        }
+
+        private void webSiteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("http://shawkyz.github.io/EyePower/");
         }
 
     }

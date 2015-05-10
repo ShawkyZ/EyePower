@@ -8,3 +8,5 @@ C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Form1.resources
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Properties.Resources.resources
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\EyePower.csproj.GenerateResource.Cache
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Interop.WMPLib.dll
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\EyePower.csproj.ResolveComReference.cache

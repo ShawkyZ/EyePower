@@ -20,6 +20,14 @@ using System.Diagnostics;
 using System.Reflection;
 using AutoUpdaterDotNET;
 using System.Net.Security;
+using FaceAPIDemo.Model.Vision;
+using FaceAPIDemo.Model.FacePlusPlus;
+using FaceAPIDemo.Detect;
+using FaceAPIDemo.Detect.Category;
+using FaceAPIDemo.Detect.Faces;
+using FaceAPIDemo.Model.Alchemy;
+using FaceAPIDemo.Model.Rekognize;
+using System.Security.AccessControl;
 namespace FaceAPIDemo
 {
     public partial class Form1 : Form
@@ -47,13 +55,16 @@ namespace FaceAPIDemo
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "JPEG Image(*.jpg)|*.jpg|BMP Image(*.bmp)|*.bmp|PNG Image(*.png)|*.png|GIF Image(*.gif)|*.gif";
-            //TODO: Check if the app was opened from Context Menu. If True We'll get the file path and process this file.
-            try
+            //TODO: Check if the app was opened from Context Menu. If True We'll get the file path and process this file.            
+            string[] args = Environment.GetCommandLineArgs();
+            GrantAccess(Path.GetDirectoryName(args[0]) + "\\lastUsed.ep");
+            if (args.Count() > 1)
             {
-                string[] args = Environment.GetCommandLineArgs();
-                if (args.Count() > 0)
+                if (args[1].Contains(".jpg") || args[1].Contains(".bmp") || args[1].Contains(".png") || args[1].Contains(".gif"))
                 {
-                    if (args[1].Contains(".jpg") || args[1].Contains(".bmp") || args[1].Contains(".png") || args[1].Contains(".gif"))
+                    FileInfo info = new FileInfo(args[1]);
+                    double sizeinMB = info.Length / (1024 * 1024);
+                    if (sizeinMB <= 4)
                     {
                         lblState.Text = "Processing...";
                         lblPath.Text = args[1];
@@ -63,147 +74,193 @@ namespace FaceAPIDemo
                         Bitmap bmp = new Bitmap(args[1]);
                         pictureBox1.Image = Bitmap.FromFile(args[1]);
                         byte[] img = (byte[])im.ConvertTo(bmp, typeof(byte[]));
-                        detectFace(img);
+                        new Thread(() =>
+                        {
+                            try
+                            {
+                                var r = FacePlusPlus.recognizewithImg(img);
+                                int apiNum = Decider.decideCategoryAPI(args[0]);
+                                if (sizeinMB >= 1 && apiNum == 1)
+                                    apiNum = 2;
+                                switch (apiNum)
+                                {
+                                    case 1:
+                                        var a = Alchemy.recongnizeWithImg(img);
+                                        showResult(r, a);
+                                        break;
+                                    case 2:
+                                        var re = Rekognize.recongnizeWithImg(img);
+                                        showResult(r, re);
+                                        break;
+                                    case 3:
+                                        var v = Vision.recognizewithImg(img);
+                                        showResult(r, v);
+                                        break;
+
+                                    default:
+                                        MessageBox.Show("Please Try Again");
+                                        break;
+                                }
+                                this.Invoke(new Action(() =>
+                                {
+                                    button1.Enabled = true;
+                                    button2.Enabled = true;
+                                    lblState.Text = "Done";
+                                }));
+                            }
+                            catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+                        }).Start();
                     }
                     else
                     {
-                        MessageBox.Show("Unsupported File Type");
-                        Environment.Exit(Environment.ExitCode);
+                        MessageBox.Show("File Size Is Larger Than 4 MB");
                     }
                 }
-            }
-            catch { }
-        }
-        #region Detection API Functions
-        private void detectFace(string imgPath)
-        {
-            //Get Result From Face++ Detection API
-            var queryString = HttpUtility.ParseQueryString(string.Empty);
-            queryString["api_key"] = "da24b5e759a050c278bfcc8a4a67a77d";
-            queryString["api_secret"] = "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ";
-            queryString["url"] = imgPath;
-            queryString["attribute"] = "gender,age,race,smiling";
-            var uri = new Uri("https://apius.faceplusplus.com/v2/detection/detect?" + queryString);
-            WebClient wb = new WebClient();
-            try
-            {
-                new Thread(() =>
+                else
                 {
-                    var response = wb.DownloadString(uri);
-
-                    DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(DetectedResult));
-                    MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(response));
-                    var result = (DetectedResult)contract.ReadObject(mstream);
-                    //Get Result From Oxford Vision Detection API
-                    queryString = HttpUtility.ParseQueryString(string.Empty);
-                    queryString["visualFeatures"] = "Categories,Adult,Faces";
-                    queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
-                    uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
-                    var request = (HttpWebRequest)WebRequest.Create(uri);
-                    var data = Encoding.ASCII.GetBytes("{\"Url\":\"" + imgPath + "\"}");
-                    request.Method = "POST";
-                    request.ContentType = "application/json";
-                    request.ContentLength = data.Length;
-                    var responseString = "";
-
-
-                    using (var stream = request.GetRequestStream())
-                    {
-                        stream.Write(data, 0, data.Length);
-                    }
-
-                    var response1 = (HttpWebResponse)request.GetResponse();
-
-                    responseString = new StreamReader(response1.GetResponseStream()).ReadToEnd();
-                    contract = new DataContractJsonSerializer(typeof(vision));
-                    mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseString));
-                    var Vision = (vision)contract.ReadObject(mstream);
-                    showResult(result, Vision);
-                }).Start();
+                    MessageBox.Show("Unsupported File Type");
+                    Environment.Exit(Environment.ExitCode);
+                }
             }
-            catch { MessageBox.Show("Unsupported File Type"); }
-
         }
-        public void detectFace(byte[] img)
+
+        void showResult(DetectedResult result, RekognizeResult rekognize)
         {
-            //Get Result From Face++ Detection API
-            Dictionary<object, object> param = new Dictionary<object, object>();
-            string url = "https://apius.faceplusplus.com/v2/detection/detect";
-            param.Add("api_key", "da24b5e759a050c278bfcc8a4a67a77d");
-            param.Add("api_secret", "zOS_jlBNdHdWyHrQDaksUdXf39f_J5xJ");
-            param.Add("attribute", "gender,age,race,smiling");
-            string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
-            byte[] boundarybytes = System.Text.Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "multipart/form-data; boundary=" + boundary;
-            request.Method = "POST";
-            request.KeepAlive = true;
-            request.Credentials = System.Net.CredentialCache.DefaultCredentials;
-
-            Stream rs = request.GetRequestStream();
-            string responseStr = null;
-            try
+            this.Invoke(new Action(() =>
             {
-                new Thread(() =>
+                button3.Show();
+                richTextBox1.Clear();
+                var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
+                syn.SetOutputToDefaultAudioDevice();
+                bool hasFaces = false;
+                //TODO:Check If The API Detected Categories In This Photo.
+                if (rekognize.scene_understanding.matches != null)
+                {
+                    if (rekognize.scene_understanding.matches.Count() > 0)
                     {
-                        string formdataTemplate = "Content-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}";
-                        foreach (string key in param.Keys)
+                        syn.SpeakAsync("Image Category is:  ");
+                        richTextBox1.Text += "Image Category is:  ";
+                        foreach (var item in rekognize.scene_understanding.matches)
                         {
-                            rs.Write(boundarybytes, 0, boundarybytes.Length);
-                            string formitem = string.Format(formdataTemplate, key, param[key]);
-                            byte[] formitembytes = System.Text.Encoding.UTF8.GetBytes(formitem);
-                            rs.Write(formitembytes, 0, formitembytes.Length);
+                            syn.SpeakAsync(item.tag.Replace('_', ' ') + "\n");
+                            richTextBox1.Text += item.tag.Replace('_', ' ') + "\n";
                         }
-                        rs.Write(boundarybytes, 0, boundarybytes.Length);
-
-                        string headerTemplate = "Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\"\r\nContent-Type: {2}\r\n\r\n";
-                        string header = string.Format(headerTemplate, "img", img, "text/plain");//image/jpeg
-                        byte[] headerbytes = System.Text.Encoding.UTF8.GetBytes(header);
-                        rs.Write(headerbytes, 0, headerbytes.Length);
-
-                        rs.Write(img, 0, img.Length);
-
-                        byte[] trailer = System.Text.Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
-                        rs.Write(trailer, 0, trailer.Length);
-                        rs.Close();
-
-                        WebResponse wresp = null;
- 
-                        wresp = request.GetResponse();
-                        Stream stream2 = wresp.GetResponseStream();
-                        StreamReader reader2 = new StreamReader(stream2);
-                        responseStr = reader2.ReadToEnd();
-                        DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(DetectedResult));
-                        MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseStr));
-                        var result = (DetectedResult)contract.ReadObject(mstream);
-
-                        //Get Result From OxFord Vision Detection API
-                        var queryString = HttpUtility.ParseQueryString(string.Empty);
-                        queryString["visualFeatures"] = "Categories,Adult,Faces";
-                        queryString["subscription-key"] = "c253f41b476747f99326b66d8ab87a35";
-                        var uri = new Uri("https://api.projectoxford.ai/vision/v1/analyses?" + queryString);
-                        request = (HttpWebRequest)WebRequest.Create(uri);
-                        request.Method = "POST";
-                        request.ContentType = "application/octet-stream";
-                        request.ContentLength = img.Length;
-                        var responseString = "";
-                        using (var stream = request.GetRequestStream())
+                    }
+                }
+                //Check If Face++ Returned Any Faces
+                if (result.face != null)
+                    if (result.face.Count() > 0)
+                        hasFaces = true;
+                if (hasFaces)
+                {
+                    syn.SpeakAsync(res.Count() + " Faces Detected\n");
+                    richTextBox1.Text += res.Count() + " Faces Detected\n";
+                    if (res.Count() > 0)
+                    {
+                        if (res.Count() > 1)
                         {
-                            stream.Write(img, 0, img.Length);
+                            syn.SpeakAsync("Starting from the Left\n");
+                            richTextBox1.Text += "Starting from the Left\n";
                         }
-                        var response = (HttpWebResponse)request.GetResponse();
-                        responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                        contract = new DataContractJsonSerializer(typeof(vision));
-                        mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(responseString));
-                        var Vision = (vision)contract.ReadObject(mstream);
-                        showResult(result, Vision);
-                    }).Start();
-            }
-            catch { MessageBox.Show("Unsupported File Type"); }
+                        int count = 0;
+                        foreach (var item in res)
+                        {
+                            string[] heshe = new string[2];
+                            if (item.attribute.gender.value.ToLower() == "female")
+                            {
+                                heshe[0] = "she";
+                                heshe[1] = "her";
+                            }
+                            else
+                            {
+                                heshe[0] = "he";
+                                heshe[1] = "his";
+                            }
+                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
+                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                        }
+                    }
+                }
+                else
+                {
+                    syn.SpeakAsync("No Faces Detected\n");
+                    richTextBox1.Text += "No Faces Detected\n";
+                    button1.Enabled = true;
+                    button2.Enabled = true;
+                    lblState.Text = "Done";
+                }
+            }));
+
         }
-        #endregion
+        void showResult(DetectedResult result, AlchemyResult alchemy)
+        {
+            this.Invoke(new Action(() =>
+            {
+                button3.Show();
+                richTextBox1.Clear();
+                var res = result.face.OrderBy((o) => o.position.center.x).ToArray();
+                syn.SetOutputToDefaultAudioDevice();
+                bool hasFaces = false;
+                //TODO:Check If The API Detected Any Categories In This Photo.
+                if (alchemy.imageKeywords != null)
+                {
+                    if (alchemy.imageKeywords.Count() > 0)
+                    {
+                        syn.SpeakAsync("Image Category is:  ");
+                        richTextBox1.Text += "Image Category is:  ";
+                        foreach (var item in alchemy.imageKeywords)
+                        {
+                            syn.SpeakAsync(item.text.Replace('_', ' ') + "\n");
+                            richTextBox1.Text += item.text.Replace('_', ' ') + "\n";
+                        }
+                    }
+                }
 
+                //Check If Face++ Returned Any Faces
+                if (result.face != null)
+                    if (result.face.Count() > 0)
+                        hasFaces = true;
+                if (hasFaces)
+                {
+                    syn.SpeakAsync(res.Count() + " Faces Detected\n");
+                    richTextBox1.Text += res.Count() + " Faces Detected\n";
+                    if (res.Count() > 0)
+                    {
+                        if (res.Count() > 1)
+                        {
+                            syn.SpeakAsync("Starting from the Left\n");
+                            richTextBox1.Text += "Starting from the Left\n";
+                        }
+                        int count = 0;
+                        foreach (var item in res)
+                        {
+                            string[] heshe = new string[2];
+                            if (item.attribute.gender.value.ToLower() == "female")
+                            {
+                                heshe[0] = "she";
+                                heshe[1] = "her";
+                            }
+                            else
+                            {
+                                heshe[0] = "he";
+                                heshe[1] = "his";
+                            }
+                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
+                            syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
+                        }
+                    }
+                }
+                else
+                {
+                    syn.SpeakAsync("No Faces Detected\n");
+                    richTextBox1.Text += "No Faces Detected\n";
+                    button1.Enabled = true;
+                    button2.Enabled = true;
+                    lblState.Text = "Done";
+                }
+            }));
+
+        }
         void showResult(DetectedResult result, vision Vision)
         {
             this.Invoke(new Action(() =>
@@ -227,7 +284,7 @@ namespace FaceAPIDemo
                         }
                     }
                 }
-                //TODO:Check If The OxFord Vision API Detected Adult Content In This Photo.
+                ////TODO:Check If The OxFord Vision API Detected Adult Content In This Photo.
                 if (Vision.adult.isAdultContent)
                 {
                     syn.SpeakAsync("Image Has Adult Content\n");
@@ -252,7 +309,7 @@ namespace FaceAPIDemo
                         foreach (var item in res)
                         {
                             string[] heshe = new string[2];
-                            if(item.attribute.gender.value.ToLower()=="female")
+                            if (item.attribute.gender.value.ToLower() == "female")
                             {
                                 heshe[0] = "she";
                                 heshe[1] = "her";
@@ -262,7 +319,7 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value +  " "+heshe[1]+" Race is: " + item.attribute.race.value + " And "+heshe[0]+" Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
+                            richTextBox1.Text += "Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n";
                             syn.SpeakAsync("Face Number: " + (++count) + " : Age: " + item.attribute.age.value + " the Gender is: " + item.attribute.gender.value + " " + heshe[1] + " Race is: " + item.attribute.race.value + " And " + heshe[0] + " Looks: " + faceState(Math.Round(item.attribute.smiling.value, 1)) + "\n");
                         }
                     }
@@ -312,16 +369,57 @@ namespace FaceAPIDemo
             {
                 try { syn.SpeakAsyncCancelAll(); }
                 catch { }
-                richTextBox1.Clear();
-                lblState.Text = "Processing...";
-                lblPath.Text = filename;
-                button1.Enabled = false;
-                button2.Enabled = false;
-                ImageConverter im = new ImageConverter();
-                Bitmap bmp = new Bitmap(openFileDialog1.FileName);
-                pictureBox1.Image = Bitmap.FromFile(openFileDialog1.FileName);
-                byte[] img = (byte[])im.ConvertTo(bmp, typeof(byte[]));
-                detectFace(img);
+                FileInfo info = new FileInfo(openFileDialog1.FileName);
+                double imgsizeMB = info.Length / (1024 * 1024);
+                if (imgsizeMB <= 4)
+                {
+                    richTextBox1.Clear();
+                    lblState.Text = "Processing...";
+                    lblPath.Text = filename;
+                    button1.Enabled = false;
+                    button2.Enabled = false;
+                    ImageConverter im = new ImageConverter();
+                    Bitmap bmp = new Bitmap(openFileDialog1.FileName);
+                    pictureBox1.Image = Bitmap.FromFile(openFileDialog1.FileName);
+                    byte[] img = (byte[])im.ConvertTo(bmp, typeof(byte[]));
+                    new Thread(() =>
+                    {
+                        var r = FacePlusPlus.recognizewithImg(img);
+                        int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
+                        if (imgsizeMB >= 1 && apiNum == 1)
+                            apiNum = 2;
+                        switch (apiNum)
+                        {
+                            case 1:
+                                var a = Alchemy.recongnizeWithImg(img);
+                                showResult(r, a);
+                                break;
+                            case 2:
+                                var re = Rekognize.recongnizeWithImg(img);
+                                showResult(r, re);
+                                break;
+                            case 3:
+                                var v = Vision.recognizewithImg(img);
+                                showResult(r, v);
+                                break;
+
+                            default:
+                                MessageBox.Show("Please Try Again");
+                                break;
+                        }
+                        this.Invoke(new Action(()=>
+                            {
+                        button1.Enabled = true;
+                        button2.Enabled = true;
+                        lblState.Text = "Done";
+                            }));
+                    }).Start();
+                   
+                }
+                else
+                {
+                    MessageBox.Show("Image Size Is Larger Than 4 MB.");
+                }
             }
 
         }
@@ -341,7 +439,37 @@ namespace FaceAPIDemo
                     byte[] imgbyte = await client.DownloadDataTaskAsync(new Uri(textBox1.Text));
                     MemoryStream ms = new MemoryStream(imgbyte);
                     pictureBox1.Image = Bitmap.FromStream(ms);
-                    detectFace(textBox1.Text);
+                    Alchemy.recongnizeWithURL(textBox1.Text);
+                    new Thread(() =>
+                    {
+                        var r = FacePlusPlus.recongnizeWithURL(textBox1.Text);
+                        int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
+                        switch (apiNum)
+                        {
+                            case 1:
+                                var a = Alchemy.recongnizeWithURL(textBox1.Text);
+                                showResult(r, a);
+                                break;
+                            case 2:
+                                var re = Rekognize.recongnizeWithURL(textBox1.Text);
+                                showResult(r, re);
+                                break;
+                            case 3:
+                                var v = Vision.recongnizeWithURL(textBox1.Text);
+                                showResult(r, v);
+                                break;
+
+                            default:
+                                MessageBox.Show("Please Try Again");
+                                break;
+                        }
+                        this.Invoke(new Action(() =>
+                        {
+                            button1.Enabled = true;
+                            button2.Enabled = true;
+                            lblState.Text = "Done";
+                        }));
+                    }).Start();
                 }
                 catch
                 {
@@ -374,11 +502,11 @@ namespace FaceAPIDemo
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AutoUpdater.Start("http://shawkyz.azurewebsites.net/apps/eyepower/Appcast.xml");
+            AutoUpdater.Start("http://shawkyz.github.io/Eye-Power/app/Appcast.xml");
         }
         private void checkForUpdateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AutoUpdater.Start("http://shawkyz.azurewebsites.net/apps/eyepower/Appcast.xml");
+            AutoUpdater.Start("http://shawkyz.github.io/Eye-Power/app/Appcast.xml");
         }
         string faceState(double smileValue)
         {
@@ -402,9 +530,21 @@ namespace FaceAPIDemo
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try { syn.SpeakAsyncCancelAll();
+            try
+            {
+                syn.SpeakAsyncCancelAll();
             }
             catch { }
+        }
+        private bool GrantAccess(string fullPath)
+        {
+            DirectoryInfo dInfo = new DirectoryInfo(fullPath);
+            DirectorySecurity dSecurity = dInfo.GetAccessControl();
+            dSecurity.AddAccessRule(new FileSystemAccessRule("everyone", FileSystemRights.FullControl,
+                                                             InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit,
+                                                             PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+            dInfo.SetAccessControl(dSecurity);
+            return true;
         }
 
     }

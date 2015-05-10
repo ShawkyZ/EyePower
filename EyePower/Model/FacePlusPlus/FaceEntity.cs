@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FaceAPIDemo.Model
+namespace FaceAPIDemo.Model.FacePlusPlus
 {
     public class Point
     {

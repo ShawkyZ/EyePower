@@ -25,6 +25,7 @@ namespace FaceAPIDemo.Detect.Category
             WebClient client = new WebClient();
             client.Proxy = null;
             var response =client.DownloadString(new Uri("http://access.alchemyapi.com/calls/url/URLGetRankedImageKeywords?"+queryString));
+            response = response.Replace("person", "people");
             DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(AlchemyResult));
             MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(response));
             AlchemyResult res =(AlchemyResult) contract.ReadObject(mstream);
@@ -45,6 +46,7 @@ namespace FaceAPIDemo.Detect.Category
             var uri = new Uri("http://access.alchemyapi.com/calls/image/ImageGetRankedImageKeywords?"+queryString);
             var response = client.UploadData(uri, img);
             string json = System.Text.Encoding.UTF8.GetString(response);
+            json = json.Replace("person", "people");            
             DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(AlchemyResult));
             MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             AlchemyResult res = (AlchemyResult)contract.ReadObject(mstream);

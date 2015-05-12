@@ -46,11 +46,13 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sourceCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.webSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.lblPath = new System.Windows.Forms.Label();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.webSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.hToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -62,6 +64,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(15, 307);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(490, 200);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -70,7 +73,7 @@
             this.button1.Location = new System.Drawing.Point(430, 84);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(96, 23);
-            this.button1.TabIndex = 2;
+            this.button1.TabIndex = 1;
             this.button1.Text = "Browse";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -94,9 +97,8 @@
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(490, 140);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "Choose an image from your local PC By Clicking Browse Button, Or Paste Image URL " +
-    "in the URL EditBox and click Start.";
+            this.richTextBox1.TabIndex = 2;
+            this.richTextBox1.Text = "Image Content Here";
             // 
             // label2
             // 
@@ -112,7 +114,10 @@
             this.textBox1.Location = new System.Drawing.Point(42, 52);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(382, 20);
-            this.textBox1.TabIndex = 1;
+            this.textBox1.TabIndex = 0;
+            this.textBox1.Text = "Paste Image URL Here";
+            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
+            this.textBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseDown);
             // 
             // label3
             // 
@@ -134,19 +139,22 @@
             // 
             // button2
             // 
+            this.button2.Enabled = false;
             this.button2.Location = new System.Drawing.Point(430, 50);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(96, 23);
             this.button2.TabIndex = 3;
             this.button2.Text = "Start";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.UseWaitCursor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.aboutToolStripMenuItem});
+            this.aboutToolStripMenuItem,
+            this.hToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(538, 24);
@@ -192,6 +200,13 @@
             this.checkForUpdateToolStripMenuItem.Text = "Check For Update";
             this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdateToolStripMenuItem_Click);
             // 
+            // webSiteToolStripMenuItem
+            // 
+            this.webSiteToolStripMenuItem.Name = "webSiteToolStripMenuItem";
+            this.webSiteToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.webSiteToolStripMenuItem.Text = "Web Site";
+            this.webSiteToolStripMenuItem.Click += new System.EventHandler(this.webSiteToolStripMenuItem_Click);
+            // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
@@ -221,16 +236,24 @@
             this.pictureBox2.TabIndex = 6;
             this.pictureBox2.TabStop = false;
             // 
-            // webSiteToolStripMenuItem
-            // 
-            this.webSiteToolStripMenuItem.Name = "webSiteToolStripMenuItem";
-            this.webSiteToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.webSiteToolStripMenuItem.Text = "Web Site";
-            this.webSiteToolStripMenuItem.Click += new System.EventHandler(this.webSiteToolStripMenuItem_Click);
-            // 
             // toolTip1
             // 
             this.toolTip1.IsBalloon = true;
+            // 
+            // hToolStripMenuItem
+            // 
+            this.hToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.readMeToolStripMenuItem});
+            this.hToolStripMenuItem.Name = "hToolStripMenuItem";
+            this.hToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.hToolStripMenuItem.Text = "&Help";
+            // 
+            // readMeToolStripMenuItem
+            // 
+            this.readMeToolStripMenuItem.Name = "readMeToolStripMenuItem";
+            this.readMeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.readMeToolStripMenuItem.Text = "&Read Me";
+            this.readMeToolStripMenuItem.Click += new System.EventHandler(this.readMeToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -258,7 +281,7 @@
             this.MinimizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Eye Power v2.1";
+            this.Text = "Eye Power v3.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -293,6 +316,8 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.ToolStripMenuItem webSiteToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripMenuItem hToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
     }
 }
 

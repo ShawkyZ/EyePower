@@ -1,12 +1,12 @@
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\Eye Power.exe.config
-C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Eye Power.exe
-C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Eye Power.pdb
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\Eye Power.exe
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\Eye Power.pdb
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\AutoUpdater.NET.dll
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\CloudinaryDotNet.dll
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\EyePower.csprojResolveAssemblyReference.cache
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Form1.resources
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\FaceAPIDemo.Properties.Resources.resources
 C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\EyePower.csproj.GenerateResource.Cache
-C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Interop.WMPLib.dll
-C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\EyePower.csproj.ResolveComReference.cache
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Eye Power.exe
+C:\Users\Abdo\Documents\Visual Studio 2013\Projects\FacePlusPlusDemo\FaceAPIDemo\obj\Debug\Eye Power.pdb

@@ -24,6 +24,7 @@ namespace FaceAPIDemo.Detect.Category
             collection["urls"] = url;
             var response = client.UploadValues("http://rekognition.com/func/api/", collection);
             string json = System.Text.Encoding.UTF8.GetString(response);
+            json=json.Replace("person", "people");
             DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(RekognizeResult));
             MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             var res = (RekognizeResult)contract.ReadObject(mstream);
@@ -40,6 +41,7 @@ namespace FaceAPIDemo.Detect.Category
             collection["base64"] = Convert.ToBase64String(img);
             var response = client.UploadValues("http://rekognition.com/func/api/", collection);
             string json = System.Text.Encoding.UTF8.GetString(response);
+            json = json.Replace("person", "people");
             DataContractJsonSerializer contract = new DataContractJsonSerializer(typeof(RekognizeResult));
             MemoryStream mstream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             var res = (RekognizeResult)contract.ReadObject(mstream);

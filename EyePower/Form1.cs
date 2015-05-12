@@ -29,6 +29,9 @@ using FaceAPIDemo.Model.Alchemy;
 using FaceAPIDemo.Model.Rekognize;
 using System.Security.AccessControl;
 using System.Media;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+
 namespace FaceAPIDemo
 {
     public partial class Form1 : Form
@@ -53,7 +56,7 @@ namespace FaceAPIDemo
                 }
             }
             InitializeComponent();
-            toolTip1.SetToolTip(textBox1, "URL");            
+            toolTip1.SetToolTip(textBox1, "URL");
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             openFileDialog1.FileName = "";
             openFileDialog1.Filter = "JPEG Image(*.jpg)|*.jpg|BMP Image(*.bmp)|*.bmp|PNG Image(*.png)|*.png|GIF Image(*.gif)|*.gif";
@@ -62,61 +65,119 @@ namespace FaceAPIDemo
             GrantAccess(Path.GetDirectoryName(args[0]) + "\\lastUsed.ep");
             if (args.Count() > 1)
             {
-                if (args[1].Contains(".jpg") || args[1].Contains(".bmp") || args[1].Contains(".png") || args[1].Contains(".gif"))
+                if (args[1].ToLower().Contains(".jpg") || args[1].ToLower().Contains(".bmp") || args[1].ToLower().Contains(".png") || args[1].ToLower().Contains(".gif"))
                 {
-                    FileInfo info = new FileInfo(args[1]);
-                    double sizeinMB = info.Length / (1024 * 1024);
-                    if (sizeinMB <= 4)
-                    {
-                        richTextBox1.Text = "Status: Processing...\n\n";
+                        richTextBox1.Clear();
+                        richTextBox1.Text = "Status: Uploading...";
                         lblPath.Text = args[1];
                         button1.Enabled = false;
                         button2.Enabled = false;
-                        ImageConverter im = new ImageConverter();
                         Bitmap bmp = new Bitmap(args[1]);
-                        pictureBox1.Image = Bitmap.FromFile(args[1]);
-                        byte[] img = (byte[])im.ConvertTo(bmp, typeof(byte[]));
-                        new Thread(() =>
+                        bool imageFlipped = false;
+                        foreach (var p in bmp.PropertyItems)
                         {
-                            try
+                            if (p.Id == 274)
                             {
-                                var r = FacePlusPlus.recognizewithImg(img);
-                                int apiNum = Decider.decideCategoryAPI(args[0]);
-                                if (sizeinMB >= 1 && apiNum == 1)
-                                    apiNum = 2;
-                                switch (apiNum)
+                                var Orientation = (int)p.Value[0];
+                                if (Orientation == 6)
                                 {
-                                    case 1:
-                                        var a = Alchemy.recongnizeWithImg(img);
-                                        showResult(r, a);
-                                        break;
-                                    case 2:
-                                        var re = Rekognize.recongnizeWithImg(img);
-                                        showResult(r, re);
-                                        break;
-                                    case 3:
-                                        var v = Vision.recognizewithImg(img);
-                                        showResult(r, v);
-                                        break;
-
-                                    default:
-                                        MessageBox.Show("Please Try Again");
-                                        break;
+                                    bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                                    imageFlipped = true;
                                 }
-                                this.Invoke(new Action(() =>
+                                if (Orientation == 7)
                                 {
-                                    button1.Enabled = true;
-                                    button2.Enabled = true;
-                                }));
+                                    bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                                    imageFlipped = true;
+                                }
+                                if (Orientation == 8)
+                                {
+                                    bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                    imageFlipped = true;
+                                }
+                                break;
                             }
-                            catch (Exception ex) { MessageBox.Show(ex.ToString()); }
-                        }).Start();
+                        }
+                        try
+                        {
+                            if (imageFlipped)
+                            {
+                                if (Path.GetFileName(args[1]).ToLower().EndsWith(".jpg"))
+                                    bmp.Save(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1]), System.Drawing.Imaging.ImageFormat.Jpeg);
+                                else if (Path.GetFileName(args[1]).ToLower().EndsWith(".png"))
+                                    bmp.Save(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1]), System.Drawing.Imaging.ImageFormat.Png);
+                                else if (Path.GetFileName(args[1]).ToLower().EndsWith(".gif"))
+                                    bmp.Save(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1]), System.Drawing.Imaging.ImageFormat.Gif);
+                                else if (Path.GetFileName(args[1]).ToLower().EndsWith(".bmp"))
+                                    bmp.Save(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1]), System.Drawing.Imaging.ImageFormat.Bmp);
+                            }
+                        }
+                        catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+                        Account acc = new Account("eyepower", "<API_KEY>", "<API_SECRET>");
+                        Cloudinary cloud = new Cloudinary(acc);
+                        var uploadResult = new ImageUploadResult();
+                        string imgURI = "";
+                        new Thread(() =>
+                            {
+                                try
+                                {
+                                    if (imageFlipped)
+                                        uploadResult = cloud.Upload(new ImageUploadParams { File = new FileDescription(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1])) });
+                                    else
+                                        uploadResult = cloud.Upload(new ImageUploadParams { File = new FileDescription(args[1]) });
+                                    imgURI = uploadResult.Uri.AbsoluteUri;
+                                    if (imageFlipped)
+                                        File.Delete(Path.GetDirectoryName(args[1]) + "\\Temp" + Path.GetFileName(args[1]));
+                                    imageFlipped = false;
+                                }
+                                catch
+                                {
+                                    imageFlipped = false;
+                                    MessageBox.Show("Error in Uploading The Image.");
+                                    lblPath.Text = "";
+                                    button1.Enabled = true;
+                                   // button2.Enabled = true;
+                                    richTextBox1.Text = "Image Content Here.";
+                                    return;
+                                }
+
+                                pictureBox1.Image = bmp;
+                                richTextBox1.Text = "Status: Processing...";
+
+                                try
+                                {
+                                    var r = FacePlusPlus.recongnizeWithURL(imgURI);
+                                    int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
+                                    switch (apiNum)
+                                    {
+                                        case 1:
+                                            var a = Alchemy.recongnizeWithURL(imgURI);
+                                            showResult(r, a);
+                                            break;
+                                        case 2:
+                                            var re = Rekognize.recongnizeWithURL(imgURI);
+                                            showResult(r, re);
+                                            break;
+                                        case 3:
+                                            var v = Vision.recongnizeWithURL(imgURI);
+                                            showResult(r, v);
+                                            break;
+
+                                        default:
+                                            MessageBox.Show("Please Try Again");
+                                            break;
+                                    }
+                                    DelResParams delPar = new DelResParams();
+                                    delPar.PublicIds.Add(uploadResult.PublicId);
+                                    cloud.DeleteResources(delPar);
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        button1.Enabled = true;
+                                       // button2.Enabled = true;
+                                    }));
+                                }
+                                catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+                            }).Start();
                     }
-                    else
-                    {
-                        MessageBox.Show("File Size Is Larger Than 4 MB");
-                    }
-                }
                 else
                 {
                     MessageBox.Show("Unsupported File Type");
@@ -147,10 +208,10 @@ namespace FaceAPIDemo
                         int count = 0;
                         foreach (var item in rekognize.scene_understanding.matches)
                         {
-                            if(count==rekognize.scene_understanding.matches.Count-1)
-                            richTextBox1.Text += item.tag.Replace('_', ' ') + ".\n";
+                            if (count == rekognize.scene_understanding.matches.Count - 1)
+                                richTextBox1.Text += item.tag.Replace('_', ' ') + ".\n";
                             else
-                            richTextBox1.Text += item.tag.Replace('_', ' ') + ", ";
+                                richTextBox1.Text += item.tag.Replace('_', ' ') + ", ";
                             count++;
                         }
                     }
@@ -182,7 +243,7 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text +="Face Number " + (++count)+ ": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
+                            richTextBox1.Text += "Face Number " + (++count) + ": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
                         }
                     }
                 }
@@ -190,7 +251,7 @@ namespace FaceAPIDemo
                 {
                     richTextBox1.Text += "No Faces Detected.\n";
                     button1.Enabled = true;
-                    button2.Enabled = true;
+                   // button2.Enabled = true;
                 }
             }));
 
@@ -261,7 +322,7 @@ namespace FaceAPIDemo
                 {
                     richTextBox1.Text += "No Faces Detected.\n";
                     button1.Enabled = true;
-                    button2.Enabled = true;
+                   // button2.Enabled = true;
                 }
             }));
 
@@ -328,7 +389,7 @@ namespace FaceAPIDemo
                                 heshe[0] = "he";
                                 heshe[1] = "his";
                             }
-                            richTextBox1.Text += "Face Number " + (++count) +": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
+                            richTextBox1.Text += "Face Number " + (++count) + ": Age " + item.attribute.age.value + ", the Gender is " + item.attribute.gender.value + ", " + heshe[1] + " Race is " + item.attribute.race.value + ", And " + heshe[0] + " Looks " + faceState(Math.Round(item.attribute.smiling.value, 1)) + " (" + Math.Round(item.attribute.smiling.value, 0) + "% Smiling)." + "\n";
                         }
                     }
                 }
@@ -354,93 +415,144 @@ namespace FaceAPIDemo
                     }
                     else
                     {
-                        richTextBox1.Text += "No Faces Detected/\n";
+                        richTextBox1.Text += "No Faces Detected.\n";
                     }
 
                 }
                 button1.Enabled = true;
-                button2.Enabled = true;
+              //  button2.Enabled = true;
             }));
 
         }
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
             openFileDialog1.ShowDialog();
             string filename = openFileDialog1.FileName;
             if (filename != "")
             {
-                FileInfo info = new FileInfo(openFileDialog1.FileName);
-                double imgsizeMB = info.Length / (1024 * 1024);
-                if (imgsizeMB <= 4)
+                richTextBox1.Clear();
+                richTextBox1.Focus();
+                richTextBox1.Text = "Status: Uploading...";
+                lblPath.Text = filename;
+                button1.Enabled = false;
+                // button2.Enabled = false;
+                Bitmap bmp = new Bitmap(openFileDialog1.FileName);
+                bool imageFlipped=false;
+                foreach (var p in bmp.PropertyItems)
                 {
-                    richTextBox1.Clear();
-                    richTextBox1.Text = "Status: Processing...";
-                    lblPath.Text = filename;
-                    button1.Enabled = false;
-                    button2.Enabled = false;
-                    ImageConverter im = new ImageConverter();
-                    Bitmap bmp = new Bitmap(openFileDialog1.FileName);
-                    pictureBox1.Image = Bitmap.FromFile(openFileDialog1.FileName);
-                    byte[] img = (byte[])im.ConvertTo(bmp, typeof(byte[]));
-                    new Thread(() =>
+                    if (p.Id == 274)
                     {
-                        var r = FacePlusPlus.recognizewithImg(img);
-                        int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
-                        if (imgsizeMB >= 1 && apiNum == 1)
-                            apiNum = 2;
-                        switch (apiNum)
+                        var Orientation = (int)p.Value[0];
+                        if (Orientation == 6)
                         {
-                            case 1:
-                                var a = Alchemy.recongnizeWithImg(img);
-                                showResult(r, a);
-                                break;
-                            case 2:
-                                var re = Rekognize.recongnizeWithImg(img);
-                                showResult(r, re);
-                                break;
-                            case 3:
-                                var v = Vision.recognizewithImg(img);
-                                showResult(r, v);
-                                break;
-
-                            default:
-                                MessageBox.Show("Please Try Again");
-                                break;
+                            bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            imageFlipped=true;
                         }
-                        this.Invoke(new Action(()=>
-                            {
-                        button1.Enabled = true;
-                        button2.Enabled = true;
-                            }));
-                    }).Start();
-                   
+                        if (Orientation == 7)
+                        {
+                            bmp.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                            imageFlipped=true;
+                        }
+                        if (Orientation == 8)
+                        {
+                            bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                            imageFlipped=true;
+                        }
+                           break;
+                    }
                 }
-                else
+                if(imageFlipped)
                 {
-                    MessageBox.Show("Image Size Is Larger Than 4 MB.");
+                if(Path.GetFileName(openFileDialog1.FileName).ToLower().EndsWith(".jpg"))
+                    bmp.Save(Path.GetDirectoryName(openFileDialog1.FileName) + "\\Temp" + Path.GetFileName(openFileDialog1.FileName),System.Drawing.Imaging.ImageFormat.Jpeg);
+                else if (Path.GetFileName(openFileDialog1.FileName).ToLower().EndsWith(".png"))
+                    bmp.Save(Path.GetDirectoryName(openFileDialog1.FileName) + "\\Temp" + Path.GetFileName(openFileDialog1.FileName),System.Drawing.Imaging.ImageFormat.Png);
+                else if (Path.GetFileName(openFileDialog1.FileName).ToLower().EndsWith(".gif"))
+                    bmp.Save(Path.GetDirectoryName(openFileDialog1.FileName) + "\\Temp" + Path.GetFileName(openFileDialog1.FileName), System.Drawing.Imaging.ImageFormat.Gif);
+                else if (Path.GetFileName(openFileDialog1.FileName).ToLower().EndsWith(".bmp"))
+                    bmp.Save(Path.GetDirectoryName(openFileDialog1.FileName) + "\\Temp" + Path.GetFileName(openFileDialog1.FileName), System.Drawing.Imaging.ImageFormat.Bmp);
                 }
-            }
+                Account acc = new Account("eyepower", "<API_KEY>", "<API_SECRET>");
+                Cloudinary cloud = new Cloudinary(acc);
+                var uploadResult = new ImageUploadResult();
+                string imgURI = "";
+                try
+                {
+                    if(imageFlipped)
+                    uploadResult = await cloud.UploadAsync(new ImageUploadParams {File=new FileDescription(Path.GetDirectoryName(openFileDialog1.FileName)+"\\Temp"+Path.GetFileName(openFileDialog1.FileName)) });
+                    else
+                     uploadResult=await cloud.UploadAsync(new ImageUploadParams {File=new FileDescription (openFileDialog1.FileName)});
+                    imgURI = uploadResult.Uri.AbsoluteUri;
+                    if(imageFlipped)
+                    File.Delete(Path.GetDirectoryName(openFileDialog1.FileName)+"\\Temp"+Path.GetFileName(openFileDialog1.FileName));
+                    imageFlipped = false;
+                }
+                catch
+                {
+                    imageFlipped = false;
+                    MessageBox.Show("Error in Uploading The Image.");
+                    lblPath.Text = "";
+                    button1.Enabled = true;
+                    // button2.Enabled = true;
+                    richTextBox1.Text = "Image Content Here.";
+                    return;
+                }
+                
+                pictureBox1.Image = bmp;
+                richTextBox1.Text = "Status: Processing...";
+                new Thread(() =>
+                {
+                    var r = FacePlusPlus.recongnizeWithURL(imgURI);
+                    int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
+                    switch (apiNum)
+                    {
+                        case 1:
+                            var a = Alchemy.recongnizeWithURL(imgURI);
+                            showResult(r, a);
+                            break;
+                        case 2:
+                            var re = Rekognize.recongnizeWithURL(imgURI);
+                            showResult(r, re);
+                            break;
+                        case 3:
+                            var v = Vision.recongnizeWithURL(imgURI);
+                            showResult(r, v);
+                            break;
 
+                        default:
+                            MessageBox.Show("Please Try Again");
+                            break;
+                    }
+                    DelResParams delPar = new DelResParams();
+                    delPar.PublicIds.Add(uploadResult.PublicId);
+                    cloud.DeleteResources(delPar);
+                    this.Invoke(new Action(() =>
+                        {
+                            button1.Enabled = true;
+                           // button2.Enabled = true;
+                        }));
+                }).Start();
+
+            }
         }
-        private async void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
             if (Uri.IsWellFormedUriString(textBox1.Text, UriKind.Absolute))
             {
-                try { syn.SpeakAsyncCancelAll(); }
-                catch { }
                 richTextBox1.Clear();
+                richTextBox1.Focus();
                 richTextBox1.Text = "Status: Processing...";
                 button1.Enabled = false;
                 button2.Enabled = false;
                 WebClient client = new WebClient();
                 try
                 {
-                    byte[] imgbyte = await client.DownloadDataTaskAsync(new Uri(textBox1.Text));
-                    MemoryStream ms = new MemoryStream(imgbyte);
-                    pictureBox1.Image = Bitmap.FromStream(ms);
-                    Alchemy.recongnizeWithURL(textBox1.Text);
                     new Thread(() =>
                     {
+                        byte[] imgbyte = client.DownloadData(new Uri(textBox1.Text));
+                        MemoryStream ms = new MemoryStream(imgbyte);
+                        pictureBox1.Image = Bitmap.FromStream(ms);
+                        Alchemy.recongnizeWithURL(textBox1.Text);
                         var r = FacePlusPlus.recongnizeWithURL(textBox1.Text);
                         int apiNum = Decider.decideCategoryAPI(Application.ExecutablePath);
                         switch (apiNum)
@@ -465,42 +577,41 @@ namespace FaceAPIDemo
                         this.Invoke(new Action(() =>
                         {
                             button1.Enabled = true;
-                            button2.Enabled = true;
+                          //  button2.Enabled = true;
                         }));
+                        textBox1.Text = "Paste Image URL Here";
                     }).Start();
                 }
                 catch
                 {
-                    richTextBox1.Text = "Choose an image from your local PC By Clicking Browse Button, Or Paste Image URL in the URL EditBox and click Start.";
+                    textBox1.Text = "Paste Image URL Here";
+                    richTextBox1.Text = "Image Content Here.";
                     button1.Enabled = true;
-                    button2.Enabled = true;
+                   // button2.Enabled = true;
                     MessageBox.Show("Unsupported File Type");
                 }
             }
             else
             {
                 MessageBox.Show("Incorrect Url");
+                button2.Enabled = false;
             }
         }
-
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("https://github.com/ShawkyZ");
         }
-
         private void sourceCodeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/ShawkyZ/EyePower");
         }
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Environment.Exit(Environment.ExitCode);
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
-            AutoUpdater.Start("http://shawkyz.azurewebsites.net/apps/eyepower/Appcast.xml");
+            AutoUpdater.Start("http://shawkyz.github.io/EyePower/app/Appcast.xml");
         }
         private void checkForUpdateToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -521,7 +632,7 @@ namespace FaceAPIDemo
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            Environment.Exit(Environment.ExitCode);
         }
         private bool GrantAccess(string fullPath)
         {
@@ -533,12 +644,54 @@ namespace FaceAPIDemo
             dInfo.SetAccessControl(dSecurity);
             return true;
         }
-
         private void webSiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start("http://shawkyz.github.io/EyePower/");
         }
 
+        private void textBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (textBox1.Text == "Paste Image URL Here")
+                textBox1.Text = "";
+            else if (textBox1.Text == " " || textBox1.Text == "")
+                textBox1.Text = "Paste Image URL Here";
+        }
+        protected override bool ProcessCmdKey(ref Message message, Keys keys)
+        {
+            switch (keys)
+            {
+                case Keys.Control | Keys.D1:
+                    textBox1.Focus();
+                    return true;
+                case Keys.Control | Keys.D2:
+                    button1.Focus();
+                    return true;
+                case Keys.Control | Keys.D3:
+                    richTextBox1.Focus();
+                    return true;
+                case Keys.Control | Keys.H:
+                    MessageBox.Show("To start using Eye Power Please do the following:\n1- If you want to add an Image URL press Control + 1. Then type or paste the URL and Press Enter.\n2- If you want to choose an Image from your PC press Control + 2 and press Enter to show The Open File Dialog and select the Image.\n3- If you want to show this text again press Control + H in the application.");
+                    return true; 
+            }
+            return base.ProcessCmdKey(ref message, keys);
+        }
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (textBox1.Text != "" && textBox1.Text != " " && textBox1.Text != "Paste Image URL Here")
+                button2.Enabled = true;
+            if (e.KeyData == Keys.Back && textBox1.Text.Count() <= 1)
+            {
+                button2.Enabled = false;
+                textBox1.Clear();
+            }
+            if (e.KeyData == Keys.Enter&&button2.Enabled)
+                button2_Click(sender, e);
+            if (e.KeyData == (Keys.Control | Keys.V))
+                button2.Enabled = true;
+        }
+        private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("To start using Eye Power Please do the following:\n1- If you want to add an Image URL press Control + 1. Then type or paste the URL and Press Enter.\n2- If you want to choose an Image from your PC press Control + 2 and press Enter to show The Open File Dialog and select the Image.\n3- If you want to show this text again press Control + H in the application.");
+        }
     }
-
 }

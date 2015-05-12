@@ -48,7 +48,7 @@ namespace FaceAPIDemo.Detect
                         useAPI = 2;
                 }
             }
-            FileStream fss = new FileStream(Path.GetDirectoryName(path)+"\\lastUsed.ep", FileMode.Create);
+            FileStream fss = new FileStream(Path.GetDirectoryName(path) + "\\lastUsed.ep", FileMode.Open);
             StreamWriter sw = new StreamWriter(fss);
             sw.WriteLine(input);
             sw.Close();

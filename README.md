@@ -4,6 +4,7 @@ Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) And 
 
 ### > [Download Installer](https://goo.gl/3hpClP)
 ### > [Check The App On SoftPedia](http://www.softpedia.com/get/Multimedia/Graphic/Graphic-Others/Eye-Power.shtml)
+### > [Check The App On Cnet](http://download.cnet.com/Eye-Power/3000-18488_4-76414919.html)
 
 ## How To Use:
 1-After Downloading the installer the app needs to run for the first time as Administrator to create some keys in Windows Registry.

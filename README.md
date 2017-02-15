@@ -1,3 +1,5 @@
+## I stopped working on this project since almost a year now. At the moment I don't have enough time to fix the current bugs and get it to work again.
+
 ## EyePower
 Analyze Any Image With Single Click.
 Built on Top of [Microsoft Vision API](https://www.projectoxford.ai/vision) And [Face++ Detection API](http://www.faceplusplus.com/), [Recognize Image Tagging API](https://rekognition.com/developer/scene) and [Alchemy Image Tagging API](http://www.alchemyapi.com/api/image-tagging/image.html)
